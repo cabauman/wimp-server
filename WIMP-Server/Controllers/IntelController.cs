@@ -96,8 +96,15 @@ namespace WIMP_Server.Controllers
         private ReadIntelDto AssociateIntelReport(Intel intel)
         {
             intel.StarSystem = _repository.GetStarSystemWithId(intel.StarSystemId);
-            intel.Character = _repository.GetCharacterWithId(intel.CharacterId);
-            intel.Ship = _repository.GetShipWithId(intel.ShipId ?? -1);
+
+            if (intel.CharacterId.HasValue)
+            {
+                intel.Character = _repository.GetCharacterWithId(intel.CharacterId.Value);
+            }
+            if (intel.ShipId.HasValue)
+            {
+                intel.Ship = _repository.GetShipWithId(intel.ShipId.Value);
+            }
 
             return _mapper.Map<ReadIntelDto>(intel);
         }
@@ -192,27 +199,9 @@ namespace WIMP_Server.Controllers
                     string.Equals(starSystemName, starSystem.Name, StringComparison.InvariantCulture)));
         }
 
-        private void CreateIntel(IntelCandidates reportCandidates, CreateIntelDto intel)
+        private void CreateIntelForCharacterAndShipPairs(DateTime timestamp, StarSystem starSystem, IEnumerable<Tuple<Character, Ship>> charactersAndShips)
         {
-            var characters = reportCandidates.Characters;
-            var ships = reportCandidates.Ships;
-            var starSystem = reportCandidates.StarSystems.FirstOrDefault();
-
-            if (starSystem != null && !_repository.HasStarSystem(starSystem.StarSystemId))
-            {
-                _repository.CreateStarSystem(starSystem);
-            }
-
-            var characterShipPairs = characters
-                .Select((c, i) => new Tuple<Character, Ship>(c, ships.ElementAtOrDefault(i)));
-
-            if (!DateTime.TryParse(intel.Timestamp, out var timestamp))
-            {
-                _logger.LogWarning($"Couldn't parse intel timestamp: {intel.Timestamp}");
-            }
-
-            var intels = new List<Intel>();
-            foreach (var characterAndShip in characterShipPairs)
+            foreach (var characterAndShip in charactersAndShips)
             {
                 var (character, ship) = characterAndShip;
 
@@ -268,6 +257,44 @@ namespace WIMP_Server.Controllers
                 {
                     _logger.LogWarning($"Unable to create intel for {character.Name} with ship {ship?.Name ?? "(null)"} in {starSystem?.Name ?? "(null)"}");
                 }
+            }
+        }
+
+        private void CreateIntel(IntelCandidates reportCandidates, CreateIntelDto intel)
+        {
+            var characters = reportCandidates.Characters;
+            var ships = reportCandidates.Ships;
+            var starSystem = reportCandidates.StarSystems.FirstOrDefault();
+
+            if (starSystem != null && !_repository.HasStarSystem(starSystem.StarSystemId))
+            {
+                _repository.CreateStarSystem(starSystem);
+            }
+
+            if (!DateTime.TryParse(intel.Timestamp, out var timestamp))
+            {
+                _logger.LogWarning($"Couldn't parse intel timestamp: {intel.Timestamp}");
+            }
+
+            if (characters.Any())
+            {
+                var characterShipPairs = characters
+                    .Select((c, i) => new Tuple<Character, Ship>(c, ships.ElementAtOrDefault(i)));
+                CreateIntelForCharacterAndShipPairs(timestamp, starSystem, characterShipPairs);
+            }
+            else if (starSystem != null && (reportCandidates.ContainsClear || reportCandidates.ContainsSpike))
+            {
+                var createdIntel = new Intel
+                {
+                    Timestamp = timestamp,
+                    StarSystemId = starSystem.StarSystemId,
+                    IsClear = reportCandidates.ContainsClear,
+                    IsSpike = reportCandidates.ContainsSpike,
+                };
+
+                _logger.LogInformation($"Creating intel for {starSystem.Name} with status: clear({reportCandidates.ContainsClear}) spike({reportCandidates.ContainsSpike})");
+
+                _repository.CreateIntel(createdIntel);
             }
 
             _repository.SaveChanges();

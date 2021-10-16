@@ -59,8 +59,15 @@ namespace WIMP_Server.Controllers
         private ReadIntelDto AssociateIntelReport(Intel intel)
         {
             intel.StarSystem = _repository.GetStarSystemWithId(intel.StarSystemId);
-            intel.Character = _repository.GetCharacterWithId(intel.CharacterId);
-            intel.Ship = _repository.GetShipWithId(intel.ShipId ?? -1);
+
+            if (intel.CharacterId.HasValue)
+            {
+                intel.Character = _repository.GetCharacterWithId(intel.CharacterId.Value);
+            }
+            if (intel.ShipId.HasValue)
+            {
+                intel.Ship = _repository.GetShipWithId(intel.ShipId.Value);
+            }
 
             return _mapper.Map<ReadIntelDto>(intel);
         }

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WIMP_Server.Data;
 
 namespace WIMP_Server.Migrations
 {
     [DbContext(typeof(WimpDbContext))]
-    partial class WimpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211016150658_AddClearAndSpikeData")]
+    partial class AddClearAndSpikeData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

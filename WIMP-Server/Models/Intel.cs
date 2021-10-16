@@ -15,8 +15,7 @@ namespace WIMP_Server.Models
         [Required]
         public int StarSystemId { get; set; }
 
-        [Required]
-        public int CharacterId { get; set; }
+        public int? CharacterId { get; set; }
 
         public int? ShipId { get; set; }
 
@@ -27,5 +26,9 @@ namespace WIMP_Server.Models
         public Character Character { get; set; }
         public Ship Ship { get; set; }
         public Character ReportedBy { get; set; }
+
+        public bool IsSpike { get; set; }
+
+        public bool IsClear { get; set; }
     }
 }
