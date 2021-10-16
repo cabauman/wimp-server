@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
 using WIMP_Server.Dtos;
-using WIMP_Server.Dtos.Esi;
 using WIMP_Server.Dtos.Picture;
 using WIMP_Server.Models;
 
@@ -16,13 +14,11 @@ namespace WIMP_Server.Controllers
     [Route("[controller]")]
     public class PictureController : ControllerBase
     {
-        private readonly ILogger<IntelController> _logger;
         private readonly IWimpRepository _repository;
         private readonly IMapper _mapper;
 
-        public PictureController(ILogger<IntelController> logger, IWimpRepository repository, IMapper mapper)
+        public PictureController(IWimpRepository repository, IMapper mapper)
         {
-            _logger = logger;
             _repository = repository;
             _mapper = mapper;
         }
