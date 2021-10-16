@@ -110,18 +110,19 @@ namespace WIMP_Server.DataServices.Http
         {
             var requestJson = JsonSerializer.Serialize(names);
             var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_esiService}/latest/universe/ids/", requestContent);
+            var response = await _httpClient.PostAsync($"{_esiService}/latest/universe/ids/", requestContent)
+                .ConfigureAwait(true);
             _logger.LogDebug($"UniverseSearchNames request response: {response.StatusCode}");
 
             if (response.IsSuccessStatusCode)
             {
                 return JsonSerializer.Deserialize<EsiUniverseBulkSearchResponseDto>(
-                    await response.Content.ReadAsStringAsync());
+                    await response.Content.ReadAsStringAsync().ConfigureAwait(true));
             }
             else
             {
                 _logger.LogError($"UniverseSearchNames request failed with status: {response.StatusCode}, content body: {requestJson}");
-                return null;
+                return EsiUniverseBulkSearchResponseDto.Empty;
             }
         }
 

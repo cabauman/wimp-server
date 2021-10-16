@@ -14,8 +14,7 @@ namespace WIMP_Server.Models
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public int ConstellationId { get; set; }
+        public int? ConstellationId { get; set; }
 
         public ICollection<Intel> Intel { get; set; }
 

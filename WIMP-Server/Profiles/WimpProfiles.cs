@@ -39,6 +39,11 @@ namespace WIMP_Server.Profiles
             CreateMap<EsiReadStargateDto, Stargate>()
                 .ForMember(dest => dest.SrcStarSystemId, opt => opt.MapFrom(src => src.SrcSystemId))
                 .ForMember(dest => dest.DstStarSystemId, opt => opt.MapFrom(src => src.Destination.SystemId));
+
+            CreateMap<EsiSearchCharacterDto, Character>()
+                .ForMember(dest => dest.CharacterId, opt => opt.MapFrom(src => src.Id));
+            CreateMap<EsiSearchSystemDto, StarSystem>()
+                .ForMember(dest => dest.StarSystemId, opt => opt.MapFrom(src => src.Id));
         }
     }
 }
