@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
 using WIMP_Server.Dtos.Universe;
 using WIMP_Server.Models;
+using WIMP_Server.Searching;
 
 namespace WIMP_Server.Controllers
 {
@@ -53,19 +54,29 @@ namespace WIMP_Server.Controllers
         [Route("{systemId}/{jumps}")]
         public ActionResult<UniverseReadGraphDto> GetGraphForSystemsWithinJumps(int systemId, int jumps)
         {
-            var visitedSystems = new Dictionary<int, StarSystem>();
+            //var visitedSystems = new Dictionary<int, StarSystem>();
 
             var system = GetStarsystemWithGates(systemId);
             if (system == null) return NotFound();
 
-            TraverseSystems(visitedSystems, system, jumps, 0);
+            var systemsWithinJumps = GraphTraversalUtilities
+                .BreadthFirstSearchWithinDistance(system, jumps,
+                n => n.StarSystemId,
+                n => GetStarsystemWithGates(n.StarSystemId).OutgoingStargates
+                    .Select(sg => _repository.GetStarSystemWithId(sg.DstStarSystemId.Value)));
+
+            // TraverseSystems(visitedSystems, system, jumps, 0);
 
             var edges = new List<Edge>();
-            foreach (var visitedSystem in visitedSystems.Values)
+            foreach (var visitedSystem in systemsWithinJumps)
             {
                 var systemEdges = visitedSystem.OutgoingStargates
-                    .Where(sg => visitedSystems.Values.Any(s => s.StarSystemId == sg.DstStarSystemId))
-                    .Where(sg => !edges.Any(e => sg.SrcStarSystemId == e.DestinationSystemId && sg.DstStarSystemId == e.SourceSystemId))
+                    .Where(sg => systemsWithinJumps
+                        .Any(s =>
+                            s.StarSystemId == sg.DstStarSystemId) &&
+                            !edges.Any(e =>
+                                sg.SrcStarSystemId == e.DestinationSystemId &&
+                                sg.DstStarSystemId == e.SourceSystemId))
                     .Select(sg => new Edge
                     {
                         SourceSystemId = sg.SrcStarSystemId.Value,
@@ -77,11 +88,11 @@ namespace WIMP_Server.Controllers
 
             var result = new UniverseReadGraphDto
             {
-                Systems = visitedSystems
+                Systems = systemsWithinJumps
                     .Select(s => new Node
                     {
-                        SystemId = s.Value.StarSystemId,
-                        SystemName = s.Value.Name
+                        SystemId = s.StarSystemId,
+                        SystemName = s.Name
                     }),
                 Edges = edges
             };

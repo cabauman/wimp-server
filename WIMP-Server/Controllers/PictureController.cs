@@ -31,7 +31,10 @@ namespace WIMP_Server.Controllers
 
             var allReportsSinceTime = _repository.GetIntelSinceTime(collectReportsSinceTime)
                 .Select(i => AssociateIntelReport(i));
-            var allCharacters = allReportsSinceTime.Select(i => i.Character.Id).Distinct();
+            var allCharacters = allReportsSinceTime
+                .Where(i => i.Character != null)
+                .Select(i => i.Character.Id)
+                .Distinct();
             var allShips = allReportsSinceTime
                 .Where(i => i.Ship != null)
                 .Select(i => i.Ship.Id)
