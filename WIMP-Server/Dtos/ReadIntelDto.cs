@@ -14,5 +14,9 @@ namespace WIMP_Server.Dtos
         public EsiNameIdPairDto Ship { get; set; }
 
         public DateTime Timestamp { get; set; }
+
+        public bool IsSpike { get; set; }
+
+        public bool IsClear { get; set; }
     }
 }
