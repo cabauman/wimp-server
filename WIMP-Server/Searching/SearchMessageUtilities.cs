@@ -7,14 +7,18 @@ namespace WIMP_Server.Searching
 {
     public static class SearchMessageUtilities
     {
-        public static string ReplaceFirst(this string text, string search, string replace)
+        public static bool TryReplaceFirst(this string text, string search, string replace, out string result)
         {
             int pos = text.IndexOf(search);
             if (pos < 0)
             {
-                return text;
+                result = text;
+                return false;
             }
-            return text[..pos] + replace + text[(pos + search.Length)..];
+
+            result = text[..pos] + replace + text[(pos + search.Length)..];
+
+            return true;
         }
 
         public static IEnumerable<string> GenerateSearchCandidates(string intel)
@@ -69,8 +73,15 @@ namespace WIMP_Server.Searching
 
             if (bestNameMatch != null)
             {
-                intel = intel.ReplaceFirst(bestNameMatch, string.Empty);
-                return ExtractNamesFromIntelStringDescendingLength(possibleNames, ref intel, caseSensitive, namesFound?.Append(bestNameMatch));
+                if (intel.TryReplaceFirst(bestNameMatch, string.Empty, out intel))
+                {
+                    return ExtractNamesFromIntelStringDescendingLength(possibleNames, ref intel, caseSensitive, namesFound?.Append(bestNameMatch));
+                }
+                else
+                {
+                    // TODO: Can we disregard the disjoint match and continue searching for other matches?
+                    return namesFound;
+                }
             }
             else
             {
