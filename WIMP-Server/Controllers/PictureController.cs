@@ -27,7 +27,7 @@ namespace WIMP_Server.Controllers
         public ActionResult<ReadPictureDto> GetPicture()
         {
             var currentTime = DateTime.UtcNow;
-            var collectReportsSinceTime = currentTime - TimeSpan.FromMinutes(10);
+            var collectReportsSinceTime = currentTime - TimeSpan.FromMinutes(15);
 
             var allReportsSinceTime = _repository.GetIntelSinceTime(collectReportsSinceTime)
                 .Select(i => AssociateIntelReport(i));
