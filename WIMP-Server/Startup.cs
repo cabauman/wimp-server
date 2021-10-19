@@ -38,10 +38,7 @@ namespace WIMP_Server
             services.AddHttpClient<IEsiDataClient, EsiDataClient>();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WIMP_Server", Version = "v1" });
-            });
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "WIMP_Server", Version = "v1" }));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -60,10 +57,7 @@ namespace WIMP_Server
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
 
             PrepareDatabase.Prepare(app);
         }

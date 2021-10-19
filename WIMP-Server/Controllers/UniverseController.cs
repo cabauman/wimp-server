@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
@@ -15,12 +13,10 @@ namespace WIMP_Server.Controllers
     [Route("[controller]")]
     public class UniverseController : ControllerBase
     {
-        private readonly ILogger<UniverseController> _logger;
         private readonly IWimpRepository _repository;
 
-        public UniverseController(ILogger<UniverseController> logger, IWimpRepository repository)
+        public UniverseController(IWimpRepository repository)
         {
-            _logger = logger;
             _repository = repository;
         }
 
@@ -54,8 +50,6 @@ namespace WIMP_Server.Controllers
         [Route("{systemId}/{jumps}")]
         public ActionResult<UniverseReadGraphDto> GetGraphForSystemsWithinJumps(int systemId, int jumps)
         {
-            //var visitedSystems = new Dictionary<int, StarSystem>();
-
             var system = GetStarsystemWithGates(systemId);
             if (system == null) return NotFound();
 
@@ -64,8 +58,6 @@ namespace WIMP_Server.Controllers
                 n => n.StarSystemId,
                 n => GetStarsystemWithGates(n.StarSystemId).OutgoingStargates
                     .Select(sg => _repository.GetStarSystemWithId(sg.DstStarSystemId.Value)));
-
-            // TraverseSystems(visitedSystems, system, jumps, 0);
 
             var edges = new List<Edge>();
             foreach (var visitedSystem in systemsWithinJumps)
@@ -98,22 +90,6 @@ namespace WIMP_Server.Controllers
             };
 
             return Ok(result);
-        }
-
-        private void TraverseSystems(Dictionary<int, StarSystem> visitedSystems, StarSystem system, int jumps, int depth)
-        {
-            if (depth > jumps) return;
-            if (visitedSystems.ContainsKey(system.StarSystemId)) return;
-
-            visitedSystems.Add(system.StarSystemId, system);
-
-            var gates = system.OutgoingStargates;
-
-            foreach (var gate in gates)
-            {
-                var nextSystem = GetStarsystemWithGates(gate.DstStarSystemId.Value);
-                TraverseSystems(visitedSystems, nextSystem, jumps, depth + 1);
-            }
         }
 
         private StarSystem GetStarsystemWithGates(int id)

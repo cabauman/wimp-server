@@ -14,27 +14,26 @@ namespace WIMP_Server.Data
     {
         public static void Prepare(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices.CreateScope())
+            using var serviceScope = app.ApplicationServices.CreateScope();
+
+            var wimpDbContext = serviceScope.ServiceProvider.GetService<WimpDbContext>();
+            Migrate(wimpDbContext);
+
+            if (!wimpDbContext.Ships.Any())
             {
-                var wimpDbContext = serviceScope.ServiceProvider.GetService<WimpDbContext>();
-                Migrate(wimpDbContext);
+                PopulateShips(
+                    serviceScope.ServiceProvider.GetService<IEsiDataClient>(),
+                    wimpDbContext,
+                    serviceScope.ServiceProvider.GetService<IMapper>());
+            }
 
-                if (wimpDbContext.Ships.Count() == 0)
-                {
-                    PopulateShips(
-                        serviceScope.ServiceProvider.GetService<IEsiDataClient>(),
-                        wimpDbContext,
-                        serviceScope.ServiceProvider.GetService<IMapper>());
-                }
-
-                if (wimpDbContext.StarSystems.Count() == 0 ||
-                    wimpDbContext.Stargates.Count() == 0)
-                {
-                    PopulateSystemsAndStargates(
-                        serviceScope.ServiceProvider.GetService<IEsiDataClient>(),
-                        wimpDbContext,
-                        serviceScope.ServiceProvider.GetService<IMapper>());
-                }
+            if (!wimpDbContext.StarSystems.Any() ||
+                !wimpDbContext.Stargates.Any())
+            {
+                PopulateSystemsAndStargates(
+                    serviceScope.ServiceProvider.GetService<IEsiDataClient>(),
+                    wimpDbContext,
+                    serviceScope.ServiceProvider.GetService<IMapper>());
             }
         }
 

@@ -13,7 +13,6 @@ namespace WIMP_Server.Dtos.Esi
 
     public class EsiReadStargateDto
     {
-
         [JsonPropertyName("stargate_id")]
         public int StargateId { get; set; }
 

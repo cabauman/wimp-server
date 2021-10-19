@@ -14,10 +14,7 @@ namespace WIMP_Server.Migrations
                     CharacterId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Characters", x => x.CharacterId);
-                });
+                constraints: table => table.PrimaryKey("PK_Characters", x => x.CharacterId));
 
             migrationBuilder.CreateTable(
                 name: "Ships",
@@ -26,10 +23,7 @@ namespace WIMP_Server.Migrations
                     ShipId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ships", x => x.ShipId);
-                });
+                constraints: table => table.PrimaryKey("PK_Ships", x => x.ShipId));
 
             migrationBuilder.CreateTable(
                 name: "StarSystems",
@@ -38,10 +32,7 @@ namespace WIMP_Server.Migrations
                     StarSystemId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StarSystems", x => x.StarSystemId);
-                });
+                constraints: table => table.PrimaryKey("PK_StarSystems", x => x.StarSystemId));
 
             migrationBuilder.CreateTable(
                 name: "Intel",

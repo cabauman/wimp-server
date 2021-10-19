@@ -7,7 +7,6 @@ namespace WIMP_Server.Data
     {
         public WimpDbContext(DbContextOptions<WimpDbContext> options) : base(options)
         {
-
         }
 
         public DbSet<Intel> Intel { get; set; }

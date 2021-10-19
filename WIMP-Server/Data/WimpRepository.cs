@@ -115,7 +115,6 @@ namespace WIMP_Server.Data
                 .Where(i => i.Timestamp >= timestamp)
                 .OrderByDescending(i => i.Timestamp)
                 .ToList();
-
         }
 
         public Intel GetMostRecentIntelForCharacterWithId(int id)

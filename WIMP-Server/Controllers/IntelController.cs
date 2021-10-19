@@ -53,7 +53,6 @@ namespace WIMP_Server.Controllers
                 {
                     _logger.LogWarning($"Couldn't determine best entity matches from: {intel.Message}");
                 }
-
             }
             catch (Exception ex)
             {
