@@ -62,10 +62,8 @@ namespace WIMP_Server.Controllers
 
             // TODO: Strip away any noise (people chatting in intel)
             // TODO: Handle SPIKE and +N reports
-            // TODO: Handle nv
             // TODO: Handle ship abbreviations e.g. vni, oni, cane
             // TODO: Handle some known system abbreviations e.g. GJ0, JW-, A-8
-            // TODO: Handle clr
 
             return Ok();
         }
@@ -112,17 +110,27 @@ namespace WIMP_Server.Controllers
         {
             var originalIntel = new string(intel);
 
-            // NOTE: Find best ship matches
-            var searchShips = _repository.FindShipsWithNames(SearchMessageUtilities.GenerateSearchCandidates(intel));
-            var bestShipMatches = FindBestShipMatches(searchShips, ref intel);
+            // NOTE: Generate initial search candidates
+            var searchCandidates = SearchMessageUtilities.GenerateSearchCandidates(intel);
 
             // NOTE: Search ESI for matching candidates
-            var esiSearchResults = await _esi.UniverseSearchNames(SearchMessageUtilities.GenerateSearchCandidates(intel))
+            var esiSearchResults = await _esi.UniverseSearchNames(searchCandidates)
                 .ConfigureAwait(true);
 
-            // NOTE: Find best character matches
+            var searchShips = _repository.FindShipsWithNames(searchCandidates);
             var searchCharacters = _mapper.Map<IEnumerable<Character>>(esiSearchResults.Characters);
+
+            // NOTE: Remove any characters with same name as a ship where ship name
+            // is only a single word. This will remove some false positive matches.
+            searchCharacters = searchCharacters.Where(character =>
+                !searchShips.Any(ship => !ship.Name.Contains(' ') && ship.Name == character.Name)
+            );
+
+            // NOTE: Find best character matches
             var bestCharacterMatches = FindBestCharacterMatches(searchCharacters, ref intel);
+
+            // NOTE: Find best ship matches
+            var bestShipMatches = FindBestShipMatches(searchShips, ref intel);
 
             // NOTE: Find best system matches
             // TODO: Search for systems in our own database instead?
