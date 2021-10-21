@@ -127,7 +127,7 @@ EsiService | The Eve ESI server endpoint to use. | https://esi.evetech.net
 ## ✍️ Authors <a name = "authors"></a>
 - [@agelito](https://github.com/agelito) - Idea & Initial work
 
-See also the list of [contributors](https://github.com/agelito/wimp-intellog/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/agelito/wimp-server/contributors) who participated in this project.
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 - [EVE Online](https://www.eveonline.com/) - The fantastic game this tool is used with.
