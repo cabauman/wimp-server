@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
@@ -48,6 +49,8 @@ namespace WIMP_Server.Controllers
 
         [HttpGet]
         [Route("{systemId}/{jumps}")]
+        [ProducesResponseType(typeof(UniverseReadGraphDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<UniverseReadGraphDto> GetGraphForSystemsWithinJumps(int systemId, int jumps)
         {
             var system = GetStarsystemWithGates(systemId);

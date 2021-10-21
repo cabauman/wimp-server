@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
@@ -36,6 +37,8 @@ namespace WIMP_Server.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> ReportIntel(CreateIntelDto intel)
         {
             _logger.LogTrace($"ReportIntel {JsonSerializer.Serialize(intel)}");
@@ -60,15 +63,11 @@ namespace WIMP_Server.Controllers
                 return BadRequest($"Unable to create intel report: {intel.Message}");
             }
 
-            // TODO: Strip away any noise (people chatting in intel)
-            // TODO: Handle SPIKE and +N reports
-            // TODO: Handle ship abbreviations e.g. vni, oni, cane
-            // TODO: Handle some known system abbreviations e.g. GJ0, JW-, A-8
-
             return Ok();
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<ReadIntelDto>), StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<ReadIntelDto>> GetIntel()
         {
             var result = _repository.GetIntel()
@@ -79,6 +78,8 @@ namespace WIMP_Server.Controllers
 
         [HttpGet]
         [Route("{intelId}")]
+        [ProducesResponseType(typeof(ReadIntelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ReadIntelDto> GetIntelById(int intelId)
         {
             var intel = _repository.GetIntelById(intelId);
