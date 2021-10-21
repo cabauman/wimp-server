@@ -215,7 +215,7 @@ namespace WIMP_Server.Controllers
 
                 if (_repository.GetIntelForCharacterWithIdAtTimestamp(character.CharacterId, timestamp) != null)
                 {
-                    _logger.LogInformation($"Duplicate intel for {character.Name} with ship {ship?.Name ?? "(null)"} in {starSystem.Name}");
+                    _logger.LogInformation($"Duplicate intel for {character.Name} with ship {ship?.Name ?? "(null)"} in {starSystem?.Name ?? "(null)"}");
                     continue;
                 }
 
