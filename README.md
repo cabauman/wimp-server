@@ -8,6 +8,7 @@ background: radial-gradient(circle, rgba(6,6,6,1) 14%, rgba(11,11,11,1) 17%, rgb
 
 <div align="center">
 
+  [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=agelito_wimp-server&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=agelito_wimp-server)
   [![License](https://img.shields.io/github/license/agelito/wimp-server)](/LICENSE)
 
 </div>
