@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/saintedlama/versionize) for commit guidelines.
 
+<a name="0.2.1"></a>
+## [0.2.1](https://www.github.com/agelito/wimp-server/releases/tag/v0.2.1) (2021-10-22)
+
 <a name="0.2.0"></a>
 ## [0.2.0](https://www.github.com/agelito/wimp-server/releases/tag/v0.2.0) (2021-10-22)
 
