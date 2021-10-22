@@ -72,11 +72,9 @@ namespace WIMP_Server.DataServices.Http
                 return null;
             }
 
-            var ships = JsonSerializer.Deserialize<IEnumerable<EsiNameIdPairDto>>(
+            return JsonSerializer.Deserialize<IEnumerable<EsiNameIdPairDto>>(
                 await namesResponse.Content.ReadAsStringAsync()
                     .ConfigureAwait(true));
-
-            return ships;
         }
 
         public async Task<IEnumerable<EsiReadSystemDto>> GetAllSystems()
@@ -94,7 +92,8 @@ namespace WIMP_Server.DataServices.Http
                 await systemsResponse.Content.ReadAsStringAsync()
                     .ConfigureAwait(true));
 
-            _logger.LogInformation($"fetching information for {allSystemIds.Count()} systems");
+            var totalSystemCount = allSystemIds.Count();
+            _logger.LogInformation($"fetching information for {totalSystemCount} systems");
 
             var allSystems = new List<EsiReadSystemDto>();
 
@@ -117,6 +116,8 @@ namespace WIMP_Server.DataServices.Http
                 allSystemIds = allSystemIds.Skip(CHUNK_SIZE);
 
                 allSystems.AddRange(getSystemTasks.Where(t => t.Result != null).Select(t => t.Result));
+
+                _logger.LogInformation($"fetched {allSystems.Count} of {totalSystemCount} systems");
             }
 
             return allSystems;
@@ -189,7 +190,8 @@ namespace WIMP_Server.DataServices.Http
 
             var stargates = new List<EsiReadStargateDto>();
 
-            _logger.LogInformation($"fetching information for {fetchStargateIds.Count()} stargates");
+            var totalStargateCount = fetchStargateIds.Count();
+            _logger.LogInformation($"fetching information for {totalStargateCount} stargates");
 
             while (fetchStargateIds.Any())
             {
@@ -210,6 +212,8 @@ namespace WIMP_Server.DataServices.Http
                 fetchStargateIds = fetchStargateIds.Skip(CHUNK_SIZE);
 
                 stargates.AddRange(getStargateTasks.Where(t => t.Result != null).Select(t => t.Result));
+
+                _logger.LogInformation($"fetched {stargates.Count} of {totalStargateCount} stargates");
             }
 
             return Task.FromResult<IEnumerable<EsiReadStargateDto>>(stargates);

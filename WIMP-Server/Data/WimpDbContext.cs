@@ -5,7 +5,7 @@ namespace WIMP_Server.Data
 {
     public class WimpDbContext : DbContext
     {
-        public WimpDbContext(DbContextOptions<WimpDbContext> options) : base(options)
+        public WimpDbContext(DbContextOptions options) : base(options)
         {
         }
 

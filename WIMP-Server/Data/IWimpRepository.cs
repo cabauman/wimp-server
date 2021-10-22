@@ -10,7 +10,7 @@ namespace WIMP_Server.Data
 
         void CreateIntel(Intel intel);
         void UpdateIntel(Intel intel);
-        void CreateCharacter(Character characters);
+        void CreateCharacter(Character character);
         void CreateShip(Ship ship);
         void CreateStarSystem(StarSystem starSystem);
 

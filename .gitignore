@@ -453,5 +453,6 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-## SQLite database
+## Database & Migrations
+WIMP-Server/Migrations/Development/**
 wimp.sqlite

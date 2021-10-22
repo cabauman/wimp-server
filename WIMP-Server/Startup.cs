@@ -13,27 +13,45 @@ namespace WIMP_Server
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
 
+        private readonly IWebHostEnvironment _environment;
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
+            if (_environment.IsDevelopment())
             {
-                options.AddDefaultPolicy(builder =>
+                services.AddCors(options =>
                 {
-                    builder.WithOrigins("http://localhost:3000")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
+                    options.AddDefaultPolicy(builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                    });
                 });
-            });
+            }
 
-            services.AddDbContext<WimpDbContext>(opt => opt.UseSqlite("Filename=wimp.sqlite"));
+            if (_environment.IsProduction())
+            {
+                services.AddDbContext<WimpDbContext>(opt =>
+                    opt.UseSqlServer(Configuration.GetConnectionString("WimpDatabase"))
+                );
+            }
+            else
+            {
+                services.AddDbContext<WimpDbContext, WimpDbContextDev>(opt =>
+                    opt.UseSqlite("Filename=wimp.sqlite")
+                );
+            }
+
             services.AddScoped<IWimpRepository, WimpRepository>();
             services.AddHttpClient<IEsiDataClient, EsiDataClient>();
             services.AddControllers();
@@ -50,11 +68,8 @@ namespace WIMP_Server
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WIMP_Server v1"));
             }
 
-            // app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseCors();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());

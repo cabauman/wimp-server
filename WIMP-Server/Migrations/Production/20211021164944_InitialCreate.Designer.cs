@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WIMP_Server.Data;
@@ -9,23 +10,25 @@ using WIMP_Server.Data;
 namespace WIMP_Server.Migrations
 {
     [DbContext(typeof(WimpDbContext))]
-    [Migration("20211010075856_AddStargatesSystemModel")]
-    partial class AddStargatesSystemModel
+    [Migration("20211021164944_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.10");
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
+                .HasAnnotation("ProductVersion", "5.0.10")
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("WIMP_Server.Models.Character", b =>
                 {
                     b.Property<int>("CharacterId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CharacterId");
 
@@ -36,25 +39,32 @@ namespace WIMP_Server.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("CharacterId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsClear")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSpike")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("ReportedById")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int?>("ShipId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("StarGateId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("StarSystemId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StargateId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -64,9 +74,9 @@ namespace WIMP_Server.Migrations
 
                     b.HasIndex("ShipId");
 
-                    b.HasIndex("StarGateId");
-
                     b.HasIndex("StarSystemId");
+
+                    b.HasIndex("StargateId");
 
                     b.ToTable("Intel");
                 });
@@ -74,11 +84,11 @@ namespace WIMP_Server.Migrations
             modelBuilder.Entity("WIMP_Server.Models.Ship", b =>
                 {
                     b.Property<int>("ShipId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ShipId");
 
@@ -88,11 +98,14 @@ namespace WIMP_Server.Migrations
             modelBuilder.Entity("WIMP_Server.Models.StarSystem", b =>
                 {
                     b.Property<int>("StarSystemId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ConstellationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StarSystemId");
 
@@ -101,31 +114,33 @@ namespace WIMP_Server.Migrations
 
             modelBuilder.Entity("WIMP_Server.Models.Stargate", b =>
                 {
-                    b.Property<int>("StarGateId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("StargateId")
+                        .HasColumnType("int");
 
-                    b.Property<int>("DstStarSystemId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("DstStarSystemId")
+                        .HasColumnType("int");
 
-                    b.Property<int>("SrcStarSystemId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("StarGateId");
+                    b.Property<int?>("SrcStarSystemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StargateId");
 
                     b.HasIndex("DstStarSystemId");
 
                     b.HasIndex("SrcStarSystemId");
 
-                    b.ToTable("Stargate");
+                    b.ToTable("Stargates");
                 });
 
             modelBuilder.Entity("WIMP_Server.Models.Intel", b =>
                 {
                     b.HasOne("WIMP_Server.Models.Character", "Character")
                         .WithMany("Intel")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CharacterId");
 
                     b.HasOne("WIMP_Server.Models.Character", "ReportedBy")
                         .WithMany()
@@ -135,15 +150,15 @@ namespace WIMP_Server.Migrations
                         .WithMany("Intel")
                         .HasForeignKey("ShipId");
 
-                    b.HasOne("WIMP_Server.Models.Stargate", null)
-                        .WithMany("Intel")
-                        .HasForeignKey("StarGateId");
-
                     b.HasOne("WIMP_Server.Models.StarSystem", "StarSystem")
                         .WithMany("Intel")
                         .HasForeignKey("StarSystemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("WIMP_Server.Models.Stargate", null)
+                        .WithMany("Intel")
+                        .HasForeignKey("StargateId");
 
                     b.Navigation("Character");
 
@@ -158,15 +173,11 @@ namespace WIMP_Server.Migrations
                 {
                     b.HasOne("WIMP_Server.Models.StarSystem", "DstStarSystem")
                         .WithMany("IncomingStargates")
-                        .HasForeignKey("DstStarSystemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DstStarSystemId");
 
                     b.HasOne("WIMP_Server.Models.StarSystem", "SrcStarSystem")
                         .WithMany("OutgoingStargates")
-                        .HasForeignKey("SrcStarSystemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SrcStarSystemId");
 
                     b.Navigation("DstStarSystem");
 

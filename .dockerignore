@@ -1,0 +1,4 @@
+WIMP-Server/*.sqlite
+WIMP-Server/bin
+WIMP-Server/obj
+WIMP-Server/Migrations/Development/**
