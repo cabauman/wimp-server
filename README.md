@@ -192,11 +192,10 @@ Run the prebuilt WIMP-Server docker image using this command:
 
 Replace the `{IPAddress}` with the `IPAddress` from previous step and `{SA_PASSWORD}` with `SA_PASSWORD`.
 
-_TODO_: Add the docker image path instead of `<path/to/image>`
 ```sh
 docker run \
   -e 'ConnectionStrings:WimpDatabase=Server={IPAddress},1433;Initial Catalog=wimpinteldb;User ID=sa;Password={SA_PASSWORD};' \
-  -d -p 8080:80 <path/to/image>
+  -d -p 8080:80 ghcr.io/agelito/wimp-server:latest
 ```
 
 **Building and running docker image from source**
