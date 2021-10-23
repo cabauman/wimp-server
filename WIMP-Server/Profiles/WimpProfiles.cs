@@ -1,7 +1,9 @@
 using AutoMapper;
 using WIMP_Server.Dtos;
 using WIMP_Server.Dtos.Esi;
+using WIMP_Server.Dtos.Users;
 using WIMP_Server.Models;
+using WIMP_Server.Models.Users;
 
 namespace WIMP_Server.Profiles
 {
@@ -44,6 +46,14 @@ namespace WIMP_Server.Profiles
                 .ForMember(dest => dest.CharacterId, opt => opt.MapFrom(src => src.Id));
             CreateMap<EsiSearchSystemDto, StarSystem>()
                 .ForMember(dest => dest.StarSystemId, opt => opt.MapFrom(src => src.Id));
+
+            // NOTE: Users mapping
+            CreateMap<RegisterUserDto, User>();
+            CreateMap<User, ReadUserDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName));
+
+            CreateMap<InvitationKey, ReadInvitationKeyDto>();
         }
     }
 }

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WIMP_Server.Models;
+using WIMP_Server.Models.Users;
 
 namespace WIMP_Server.Data
 {
-    public class WimpDbContext : DbContext
+    public class WimpDbContext : IdentityDbContext<User>
     {
         public WimpDbContext(DbContextOptions options) : base(options)
         {
@@ -19,8 +21,12 @@ namespace WIMP_Server.Data
 
         public DbSet<Stargate> Stargates { get; set; }
 
+        public DbSet<InvitationKey> InvitationKeys { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder
                 .Entity<Character>()
                 .HasMany(c => c.Intel)
@@ -80,6 +86,12 @@ namespace WIMP_Server.Data
                 .HasOne(s => s.DstStarSystem)
                 .WithMany(s => s.IncomingStargates)
                 .HasForeignKey(s => s.DstStarSystemId);
+
+            modelBuilder
+                .Entity<User>()
+                .HasMany(u => u.InvitationKeys)
+                .WithOne(ik => ik.GeneratedByUser)
+                .HasForeignKey(u => u.GeneratedByUserId);
         }
     }
 }
