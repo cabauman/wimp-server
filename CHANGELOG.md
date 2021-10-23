@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/saintedlama/versionize) for commit guidelines.
 
+<a name="0.3.2"></a>
+## [0.3.2](https://www.github.com/agelito/wimp-server/releases/tag/v0.3.2) (2021-10-24)
+
+### Bug Fixes
+
+* update production db migrations (#13) ([efc82cc](https://www.github.com/agelito/wimp-server/commit/efc82ccac8f575fd449ba17d4b6679a3938e41d4))
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://www.github.com/agelito/wimp-server/releases/tag/v0.3.1) (2021-10-24)
 
