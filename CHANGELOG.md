@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/saintedlama/versionize) for commit guidelines.
 
+<a name="0.3.0"></a>
+## [0.3.0](https://www.github.com/agelito/wimp-server/releases/tag/v0.3.0) (2021-10-24)
+
+### Features
+
+* users and authentication (#12) ([85f2569](https://www.github.com/agelito/wimp-server/commit/85f25696aabc825f42b95e0c6e1f75149504e7da))
+
 <a name="0.2.1"></a>
 ## [0.2.1](https://www.github.com/agelito/wimp-server/releases/tag/v0.2.1) (2021-10-22)
 
