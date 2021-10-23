@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace WIMP_Server.Dtos.Users
@@ -9,5 +10,8 @@ namespace WIMP_Server.Dtos.Users
 
         [JsonPropertyName("username")]
         public string Username { get; set; }
+
+        [JsonPropertyName("roles")]
+        public IEnumerable<string> Roles { get; set; }
     }
 }

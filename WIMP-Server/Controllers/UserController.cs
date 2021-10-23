@@ -81,7 +81,11 @@ namespace WIMP_Server.Controllers
 
             _logger.LogInformation($"Registered user with id {user.Id} and username {user.UserName}");
 
+            var roles = await _userManager.GetRolesAsync(user)
+                .ConfigureAwait(true);
+
             var readUserDto = _mapper.Map<ReadUserDto>(user);
+            readUserDto.Roles = roles;
 
             return CreatedAtRoute(nameof(GetUserById), new { readUserDto.Id }, readUserDto);
         }
@@ -147,7 +151,13 @@ namespace WIMP_Server.Controllers
                 return NotFound($"Couldn't find user with {nameof(id)}");
             }
 
-            return Ok(_mapper.Map<ReadUserDto>(user));
+            var roles = await _userManager.GetRolesAsync(user)
+                .ConfigureAwait(true);
+
+            var readUser = _mapper.Map<ReadUserDto>(user);
+            readUser.Roles = roles;
+
+            return Ok(readUser);
         }
 
         [HttpGet(Name = "GetUser")]
@@ -164,7 +174,13 @@ namespace WIMP_Server.Controllers
                 return NotFound("Couldn't find user.");
             }
 
-            return Ok(_mapper.Map<ReadUserDto>(user));
+            var roles = await _userManager.GetRolesAsync(user)
+                .ConfigureAwait(true);
+
+            var readUser = _mapper.Map<ReadUserDto>(user);
+            readUser.Roles = roles;
+
+            return Ok(readUser);
         }
 
         [HttpPost("changePassword", Name = "ChangePassword")]
