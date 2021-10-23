@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WIMP_Server.Data;
 
-namespace WIMP_Server.Migrations
+namespace WIMP_Server.Migrations.Production
 {
     [DbContext(typeof(WimpDbContext))]
-    partial class WimpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211023172605_AddAuth")]
+    partial class AddAuth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
