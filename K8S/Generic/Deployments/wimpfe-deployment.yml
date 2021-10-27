@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wimpfe-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wimpfe
+  template:
+    metadata:
+      labels:
+        app: wimpfe
+    spec:
+      containers:
+        - name: wimpfe
+          image: ghcr.io/agelito/wimp-fe:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wimpfe-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: wimpfe
+  ports:
+    - name: wimpfe
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: wimpfe-ssl
+      protocol: TCP
+      port: 443
+      targetPort: 443

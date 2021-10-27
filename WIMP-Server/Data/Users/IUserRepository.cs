@@ -15,6 +15,8 @@ namespace WIMP_Server.Data.Users
 
         InvitationKey FindInvitationKey(string key);
 
+        IEnumerable<User> GetAllUsers();
+
         bool SaveChanges();
     }
 }

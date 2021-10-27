@@ -14,7 +14,7 @@ namespace WIMP_Server.Controllers
 {
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PictureController : ControllerBase
     {
         private readonly IWimpRepository _repository;

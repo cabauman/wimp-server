@@ -22,7 +22,7 @@ using WIMP_Server.Options;
 namespace WIMP_Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : ControllerBase
     {
@@ -77,6 +77,13 @@ namespace WIMP_Server.Controllers
             if (!createUserResult.Succeeded)
             {
                 return UnprocessableEntity(string.Join('\n', createUserResult.Errors.Select(e => e.Description)));
+            }
+
+            var addRoleResult = await _userManager.AddToRoleAsync(user, "User")
+                    .ConfigureAwait(true);
+            if (!addRoleResult.Succeeded)
+            {
+                return UnprocessableEntity(string.Join('\n', addRoleResult.Errors.Select(e => e.Description)));
             }
 
             _logger.LogInformation($"Registered user with id {user.Id} and username {user.UserName}");

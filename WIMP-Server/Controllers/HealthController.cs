@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WIMP_Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
         [HttpGet]

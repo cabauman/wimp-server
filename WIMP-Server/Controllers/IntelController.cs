@@ -20,7 +20,7 @@ using WIMP_Server.Searching;
 namespace WIMP_Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class IntelController : ControllerBase
     {

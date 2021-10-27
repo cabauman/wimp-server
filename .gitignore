@@ -456,3 +456,6 @@ $RECYCLE.BIN/
 ## Database & Migrations
 WIMP-Server/Migrations/Development/**
 wimp.sqlite
+
+## K8S Secrets
+K8S/Secrets/**

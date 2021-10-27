@@ -35,6 +35,12 @@ namespace WIMP_Server.Data.Users
                 .AsEnumerable();
         }
 
+        public IEnumerable<User> GetAllUsers()
+        {
+            return _dbContext.Users
+                .AsEnumerable();
+        }
+
         public IEnumerable<InvitationKey> GetInvitationKeysByUserId(string userId)
         {
             return _dbContext.InvitationKeys

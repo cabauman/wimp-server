@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using WIMP_Server.Data;
 using WIMP_Server.Dtos.Universe;
 using WIMP_Server.Models;
@@ -11,7 +10,7 @@ using WIMP_Server.Searching;
 namespace WIMP_Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UniverseController : ControllerBase
     {
         private readonly IWimpRepository _repository;
