@@ -35,9 +35,17 @@ namespace WIMP_Server.Data.Users
                 .AsEnumerable();
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public IEnumerable<User> GetUsers()
         {
             return _dbContext.Users
+                .AsEnumerable();
+        }
+
+        public IEnumerable<User> GetPaginatedUsers(int skip, int count)
+        {
+            return _dbContext.Users
+                .Skip(skip)
+                .Take(count)
                 .AsEnumerable();
         }
 

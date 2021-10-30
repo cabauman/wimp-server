@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using WIMP_Server.Auth.Roles;
 using WIMP_Server.Models.Users;
 using WIMP_Server.Options;
 
@@ -11,9 +12,6 @@ namespace WIMP_Server.Data.Users
 {
     public static class PrepareUsers
     {
-        private static readonly string[] DEFAULT_ROLES = new string[]
-            {"Admin", "Manager", "User"};
-
         public static void Prepare(IApplicationBuilder app)
         {
             using var serviceScope = app.ApplicationServices.CreateScope();
@@ -26,7 +24,7 @@ namespace WIMP_Server.Data.Users
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            foreach (var role in DEFAULT_ROLES)
+            foreach (var role in Role.AllRoles)
             {
                 var roleExist = await roleManager.RoleExistsAsync(role)
                     .ConfigureAwait(true);
@@ -68,7 +66,7 @@ namespace WIMP_Server.Data.Users
                     throw new Exception("Couldn't create default user");
                 }
 
-                var addRolesResult = await userManager.AddToRoleAsync(user, DEFAULT_ROLES[0])
+                var addRolesResult = await userManager.AddToRoleAsync(user, Role.Admin)
                     .ConfigureAwait(true);
                 if (!addRolesResult.Succeeded)
                 {

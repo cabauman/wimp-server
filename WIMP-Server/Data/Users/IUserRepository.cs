@@ -15,7 +15,9 @@ namespace WIMP_Server.Data.Users
 
         InvitationKey FindInvitationKey(string key);
 
-        IEnumerable<User> GetAllUsers();
+        IEnumerable<User> GetUsers();
+
+        IEnumerable<User> GetPaginatedUsers(int skip, int count);
 
         bool SaveChanges();
     }

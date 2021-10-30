@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,11 +11,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WIMP_Server.Auth.ApiKey;
+using WIMP_Server.Auth.Policies;
+using WIMP_Server.Auth.Policies.Requirements;
+using WIMP_Server.Auth.Policies.Handlers;
 using WIMP_Server.Data;
 using WIMP_Server.Data.Users;
 using WIMP_Server.DataServices.Http;
 using WIMP_Server.Models.Users;
 using WIMP_Server.Options;
+using WIMP_Server.Data.Auth;
 
 namespace WIMP_Server
 {
@@ -64,6 +70,8 @@ namespace WIMP_Server
 
             services.AddScoped<IWimpRepository, WimpRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
+
             services.AddHttpClient<IEsiDataClient, EsiDataClient>();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -119,11 +127,20 @@ namespace WIMP_Server
                     RequireExpirationTime = true,
                     ValidateLifetime = true,
                 };
+            }).AddApiKeySupport(_ => { });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(Policy.OnlyAdmins, policy => policy.Requirements.Add(new OnlyAdminsRequirement()));
+                options.AddPolicy(Policy.OnlyUsers, policy => policy.Requirements.Add(new OnlyUsersRequirement()));
             });
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<WimpDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddSingleton<IAuthorizationHandler, OnlyAdminsAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, OnlyUsersAuthorizationHandler>();
+
+            services.AddIdentityCore<User>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<WimpDbContext>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

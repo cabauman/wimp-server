@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WIMP_Server.Auth.Policies;
 using WIMP_Server.Data;
 using WIMP_Server.Dtos.Universe;
 using WIMP_Server.Models;
@@ -11,6 +13,7 @@ namespace WIMP_Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = Policy.OnlyUsers)]
     public class UniverseController : ControllerBase
     {
         private readonly IWimpRepository _repository;

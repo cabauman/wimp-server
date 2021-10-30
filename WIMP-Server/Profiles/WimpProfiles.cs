@@ -3,6 +3,7 @@ using WIMP_Server.Dtos;
 using WIMP_Server.Dtos.Esi;
 using WIMP_Server.Dtos.Users;
 using WIMP_Server.Models;
+using WIMP_Server.Models.Auth;
 using WIMP_Server.Models.Users;
 
 namespace WIMP_Server.Profiles
@@ -54,6 +55,13 @@ namespace WIMP_Server.Profiles
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName));
 
             CreateMap<InvitationKey, ReadInvitationKeyDto>();
+
+            // NOTE: Api Key mapping
+            CreateMap<ApiKeyRole, string>()
+                .ConvertUsing(src => src.Role);
+            CreateMap<ApiKey, ReadApiKeyDto>()
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(src => src.Key))
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles));
         }
     }
 }

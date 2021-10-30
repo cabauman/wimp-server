@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,8 +13,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using WIMP_Server.Auth.Policies;
+using WIMP_Server.Auth.Roles;
+using WIMP_Server.Data.Auth;
 using WIMP_Server.Data.Users;
 using WIMP_Server.Dtos.Users;
+using WIMP_Server.Models.Auth;
 using WIMP_Server.Models.Users;
 using WIMP_Server.Options;
 
@@ -23,12 +26,13 @@ namespace WIMP_Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Policy = Policy.OnlyUsers)]
     public class UserController : ControllerBase
     {
-        public UserController(IUserRepository userRepository, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwt, IMapper mapper, ILogger<UserController> logger)
+        public UserController(IUserRepository userRepository, IApiKeyRepository apiKeyRepository, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JwtOptions> jwt, IMapper mapper, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
+            _apiKeyRepository = apiKeyRepository;
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
@@ -37,6 +41,7 @@ namespace WIMP_Server.Controllers
         }
 
         private readonly IUserRepository _userRepository;
+        private readonly IApiKeyRepository _apiKeyRepository;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JwtOptions _jwt;
@@ -79,7 +84,7 @@ namespace WIMP_Server.Controllers
                 return UnprocessableEntity(string.Join('\n', createUserResult.Errors.Select(e => e.Description)));
             }
 
-            var addRoleResult = await _userManager.AddToRoleAsync(user, "User")
+            var addRoleResult = await _userManager.AddToRoleAsync(user, Role.User)
                     .ConfigureAwait(true);
             if (!addRoleResult.Succeeded)
             {
@@ -240,6 +245,90 @@ namespace WIMP_Server.Controllers
             }
 
             _logger.LogInformation($"Deleted user: {user.Id}");
+
+            return Ok();
+        }
+
+        [HttpGet("key", Name = nameof(GetApiKeys))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ActionResult<IEnumerable<ReadApiKeyDto>>> GetApiKeys()
+        {
+            var owner = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+            var apiKey = _apiKeyRepository.GetByOwner(owner);
+            if (apiKey == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<ReadApiKeyDto>>(apiKey));
+        }
+
+        [HttpGet("key/{key}", Name = nameof(GetApiKey))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<ActionResult<ReadApiKeyDto>> GetApiKey(string key)
+        {
+            var owner = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+            var apiKey = _apiKeyRepository
+                .GetByOwner(owner)
+                .FirstOrDefault(k => k.Key == key);
+            if (apiKey == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<ReadApiKeyDto>(apiKey));
+        }
+
+        [HttpPost("key")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public ActionResult<ReadApiKeyDto> CreateApiKey()
+        {
+            var owner = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+            var existingApiKey = _apiKeyRepository.GetByOwner(owner).FirstOrDefault();
+            if (existingApiKey != null)
+            {
+                return Conflict("User already have a generated API key");
+            }
+
+            var roles = new List<ApiKeyRole> {
+                new ApiKeyRole { Role = Role.IntelReport }
+            };
+
+            var apiKey = new ApiKey
+            {
+                Created = DateTime.UtcNow,
+                Key = Nanoid.Nanoid.Generate(),
+                Owner = owner,
+                Roles = roles,
+            };
+
+            _apiKeyRepository.Add(apiKey);
+            _apiKeyRepository.Save();
+
+            var readApiKeyDto = _mapper.Map<ReadApiKeyDto>(apiKey);
+
+            return CreatedAtRoute(nameof(GetApiKey), new { readApiKeyDto.Key }, readApiKeyDto);
+        }
+
+        [HttpDelete("key/{key}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult DeleteApiKey(string key)
+        {
+            var owner = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+            var existingApiKey = _apiKeyRepository
+                .GetByOwner(owner)
+                .FirstOrDefault(apiKey => apiKey.Key == key);
+            if (existingApiKey == null)
+            {
+                return NotFound();
+            }
+
+            _apiKeyRepository.Delete(existingApiKey);
+            _apiKeyRepository.Save();
 
             return Ok();
         }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WIMP_Server.Models;
+using WIMP_Server.Models.Auth;
 using WIMP_Server.Models.Users;
 
 namespace WIMP_Server.Data
@@ -22,6 +23,8 @@ namespace WIMP_Server.Data
         public DbSet<Stargate> Stargates { get; set; }
 
         public DbSet<InvitationKey> InvitationKeys { get; set; }
+
+        public DbSet<ApiKey> ApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,6 +95,12 @@ namespace WIMP_Server.Data
                 .HasMany(u => u.InvitationKeys)
                 .WithOne(ik => ik.GeneratedByUser)
                 .HasForeignKey(u => u.GeneratedByUserId);
+
+            modelBuilder
+                .Entity<ApiKey>()
+                .OwnsMany(apiKey => apiKey.Roles)
+                .WithOwner(role => role.Owner)
+                .HasForeignKey(role => role.ApiKey);
         }
     }
 }
