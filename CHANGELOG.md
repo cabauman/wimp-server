@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/saintedlama/versionize) for commit guidelines.
 
+<a name="0.4.0"></a>
+## [0.4.0](https://www.github.com/agelito/wimp-server/releases/tag/v0.4.0) (2021-10-31)
+
+### Bug Fixes
+
+* json property names for read api key ([ee65d55](https://www.github.com/agelito/wimp-server/commit/ee65d55b95e1701445cdb630050a3f628e0c3f8a))
+* only write response if not already started ([e3d8df5](https://www.github.com/agelito/wimp-server/commit/e3d8df5828864f8305aa7281d7471cd58bb9fb63))
+
+### Features
+
+* admin api and k8s configuration (#14) ([c510a86](https://www.github.com/agelito/wimp-server/commit/c510a86c296df50a1071e776b30507afc853b41f))
+* api keys and roles (#15) ([f88dba9](https://www.github.com/agelito/wimp-server/commit/f88dba9d31fdef0fd9c5df1067cf59aaeeb61ea2))
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://www.github.com/agelito/wimp-server/releases/tag/v0.3.3) (2021-10-24)
 
