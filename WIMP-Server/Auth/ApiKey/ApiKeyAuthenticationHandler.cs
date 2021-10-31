@@ -66,22 +66,28 @@ namespace WIMP_Server.Auth.ApiKey
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.StatusCode = 401;
-            Response.ContentType = ProblemDetailsContentType;
-            var problemDetails = new StatusCodeProblemDetails(401);
+            if (!Response.HasStarted)
+            {
+                Response.StatusCode = 401;
+                Response.ContentType = ProblemDetailsContentType;
+                var problemDetails = new StatusCodeProblemDetails(401);
 
-            await Response.WriteAsync(JsonSerializer.Serialize(problemDetails))
-                .ConfigureAwait(true);
+                await Response.WriteAsync(JsonSerializer.Serialize(problemDetails))
+                    .ConfigureAwait(true);
+            }
         }
 
         protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
         {
-            Response.StatusCode = 403;
-            Response.ContentType = ProblemDetailsContentType;
-            var problemDetails = new StatusCodeProblemDetails(403);
+            if (!Response.HasStarted)
+            {
+                Response.StatusCode = 403;
+                Response.ContentType = ProblemDetailsContentType;
+                var problemDetails = new StatusCodeProblemDetails(403);
 
-            await Response.WriteAsync(JsonSerializer.Serialize(problemDetails))
-                .ConfigureAwait(true);
+                await Response.WriteAsync(JsonSerializer.Serialize(problemDetails))
+                    .ConfigureAwait(true);
+            }
         }
     }
 }
