@@ -1,33 +1,32 @@
 using System.Text.Json.Serialization;
 
-namespace WIMP_Server.Dtos.Esi
+namespace WIMP_Server.Dtos.Esi;
+
+public class StargateDestination
 {
-    public class StargateDestination
-    {
-        [JsonPropertyName("stargate_id")]
-        public int StargateId { get; set; }
+    [JsonPropertyName("stargate_id")]
+    public int StargateId { get; set; }
 
-        [JsonPropertyName("system_id")]
-        public int SystemId { get; set; }
-    }
+    [JsonPropertyName("system_id")]
+    public int SystemId { get; set; }
+}
 
-    public class EsiReadStargateDto
-    {
-        [JsonPropertyName("stargate_id")]
-        public int StargateId { get; set; }
+public class EsiReadStargateDto
+{
+    [JsonPropertyName("stargate_id")]
+    public int StargateId { get; set; }
 
-        [JsonPropertyName("system_id")]
-        public int SrcSystemId { get; set; }
+    [JsonPropertyName("system_id")]
+    public int SrcSystemId { get; set; }
 
-        [JsonPropertyName("type_id")]
-        public int TypeId { get; set; }
+    [JsonPropertyName("type_id")]
+    public int TypeId { get; set; }
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 
-        [JsonPropertyName("destination")]
-        public StargateDestination Destination { get; set; }
-    }
+    [JsonPropertyName("destination")]
+    public StargateDestination Destination { get; set; }
 }
 
 /* {

@@ -10,68 +10,67 @@ using WIMP_Server.Dtos;
 using WIMP_Server.Dtos.Picture;
 using WIMP_Server.Models;
 
-namespace WIMP_Server.Controllers
+namespace WIMP_Server.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize(Policy = Policy.OnlyUsers)]
+public class PictureController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Policy = Policy.OnlyUsers)]
-    public class PictureController : ControllerBase
+    private readonly IWimpRepository _repository;
+    private readonly IMapper _mapper;
+
+    public PictureController(IWimpRepository repository, IMapper mapper)
     {
-        private readonly IWimpRepository _repository;
-        private readonly IMapper _mapper;
+        _repository = repository;
+        _mapper = mapper;
+    }
 
-        public PictureController(IWimpRepository repository, IMapper mapper)
+    [HttpGet]
+    public ActionResult<ReadPictureDto> GetPicture()
+    {
+        var currentTime = DateTime.UtcNow;
+        var collectReportsSinceTime = currentTime - TimeSpan.FromMinutes(15);
+
+        var allReportsSinceTime = _repository.GetIntelSinceTime(collectReportsSinceTime)
+            .Select(i => AssociateIntelReport(i));
+        var allCharacters = allReportsSinceTime
+            .Where(i => i.Character != null)
+            .Select(i => i.Character.Id)
+            .Distinct();
+        var allShips = allReportsSinceTime
+            .Where(i => i.Ship != null)
+            .Select(i => i.Ship.Id)
+            .Distinct();
+
+        var allSystems = allReportsSinceTime.Select(i => i.StarSystem.Id).Distinct();
+
+        var picture = new ReadPictureDto
         {
-            _repository = repository;
-            _mapper = mapper;
+            SinceTime = collectReportsSinceTime,
+            GeneratedTime = currentTime,
+            ReportedIntel = allReportsSinceTime,
+            ReportedCharacters = allCharacters,
+            ReportedShips = allShips,
+            ReportedSystems = allSystems
+        };
+
+        return Ok(picture);
+    }
+
+    private ReadIntelDto AssociateIntelReport(Intel intel)
+    {
+        intel.StarSystem = _repository.GetStarSystemWithId(intel.StarSystemId);
+
+        if (intel.CharacterId.HasValue)
+        {
+            intel.Character = _repository.GetCharacterWithId(intel.CharacterId.Value);
+        }
+        if (intel.ShipId.HasValue)
+        {
+            intel.Ship = _repository.GetShipWithId(intel.ShipId.Value);
         }
 
-        [HttpGet]
-        public ActionResult<ReadPictureDto> GetPicture()
-        {
-            var currentTime = DateTime.UtcNow;
-            var collectReportsSinceTime = currentTime - TimeSpan.FromMinutes(15);
-
-            var allReportsSinceTime = _repository.GetIntelSinceTime(collectReportsSinceTime)
-                .Select(i => AssociateIntelReport(i));
-            var allCharacters = allReportsSinceTime
-                .Where(i => i.Character != null)
-                .Select(i => i.Character.Id)
-                .Distinct();
-            var allShips = allReportsSinceTime
-                .Where(i => i.Ship != null)
-                .Select(i => i.Ship.Id)
-                .Distinct();
-
-            var allSystems = allReportsSinceTime.Select(i => i.StarSystem.Id).Distinct();
-
-            var picture = new ReadPictureDto
-            {
-                SinceTime = collectReportsSinceTime,
-                GeneratedTime = currentTime,
-                ReportedIntel = allReportsSinceTime,
-                ReportedCharacters = allCharacters,
-                ReportedShips = allShips,
-                ReportedSystems = allSystems
-            };
-
-            return Ok(picture);
-        }
-
-        private ReadIntelDto AssociateIntelReport(Intel intel)
-        {
-            intel.StarSystem = _repository.GetStarSystemWithId(intel.StarSystemId);
-
-            if (intel.CharacterId.HasValue)
-            {
-                intel.Character = _repository.GetCharacterWithId(intel.CharacterId.Value);
-            }
-            if (intel.ShipId.HasValue)
-            {
-                intel.Ship = _repository.GetShipWithId(intel.ShipId.Value);
-            }
-
-            return _mapper.Map<ReadIntelDto>(intel);
-        }
+        return _mapper.Map<ReadIntelDto>(intel);
     }
 }

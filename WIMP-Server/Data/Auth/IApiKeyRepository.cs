@@ -2,18 +2,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WIMP_Server.Models.Auth;
 
-namespace WIMP_Server.Data.Auth
+namespace WIMP_Server.Data.Auth;
+
+public interface IApiKeyRepository
 {
-    public interface IApiKeyRepository
-    {
-        void Add(ApiKey key);
+    void Add(ApiKey key);
 
-        ApiKey Get(string apiKey);
+    ApiKey Get(string apiKey);
 
-        IEnumerable<ApiKey> GetByOwner(string owner);
+    IEnumerable<ApiKey> GetByOwner(string owner);
 
-        void Delete(ApiKey key);
+    void Delete(ApiKey key);
 
-        bool Save();
-    }
+    bool Save();
 }
