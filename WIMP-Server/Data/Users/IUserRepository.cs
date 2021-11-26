@@ -1,24 +1,23 @@
 using System.Collections.Generic;
 using WIMP_Server.Models.Users;
 
-namespace WIMP_Server.Data.Users
+namespace WIMP_Server.Data.Users;
+
+public interface IUserRepository
 {
-    public interface IUserRepository
-    {
-        void CreateInvitationKey(InvitationKey invitationKey);
+    void CreateInvitationKey(InvitationKey invitationKey);
 
-        InvitationKey GetInvitationKeyWithId(int id);
+    InvitationKey GetInvitationKeyWithId(int id);
 
-        IEnumerable<InvitationKey> GetInvitationKeysByUserId(string userId);
+    IEnumerable<InvitationKey> GetInvitationKeysByUserId(string userId);
 
-        IEnumerable<InvitationKey> GetAllInvitationKeys();
+    IEnumerable<InvitationKey> GetAllInvitationKeys();
 
-        InvitationKey FindInvitationKey(string key);
+    InvitationKey FindInvitationKey(string key);
 
-        IEnumerable<User> GetUsers();
+    IEnumerable<User> GetUsers();
 
-        IEnumerable<User> GetPaginatedUsers(int skip, int count);
+    IEnumerable<User> GetPaginatedUsers(int skip, int count);
 
-        bool SaveChanges();
-    }
+    bool SaveChanges();
 }

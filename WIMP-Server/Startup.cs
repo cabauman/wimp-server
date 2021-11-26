@@ -22,73 +22,73 @@ using WIMP_Server.Models.Users;
 using WIMP_Server.Options;
 using WIMP_Server.Data.Auth;
 
-namespace WIMP_Server
+namespace WIMP_Server;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        Configuration = configuration;
+        _environment = environment;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    private readonly IWebHostEnvironment _environment;
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.Configure<DefaultUserOptions>(Configuration.GetSection(DefaultUserOptions.Key));
+        services.Configure<JwtOptions>(Configuration.GetSection(JwtOptions.Key));
+
+        if (_environment.IsDevelopment())
         {
-            Configuration = configuration;
-            _environment = environment;
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
         }
 
-        public IConfiguration Configuration { get; }
-
-        private readonly IWebHostEnvironment _environment;
-
-        public void ConfigureServices(IServiceCollection services)
+        if (_environment.IsProduction())
         {
-            services.Configure<DefaultUserOptions>(Configuration.GetSection(DefaultUserOptions.Key));
-            services.Configure<JwtOptions>(Configuration.GetSection(JwtOptions.Key));
+            services.AddDbContext<WimpDbContext>(opt =>
+                opt.UseSqlServer(Configuration.GetConnectionString("WimpDatabase"))
+            );
+        }
+        else
+        {
+            services.AddDbContext<WimpDbContext, WimpDbContextDev>(opt =>
+                opt.UseSqlite("Filename=wimp.sqlite")
+            );
+        }
 
-            if (_environment.IsDevelopment())
-            {
-                services.AddCors(options =>
-                {
-                    options.AddDefaultPolicy(builder =>
-                    {
-                        builder.WithOrigins("http://localhost:3000")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                    });
-                });
-            }
+        services.AddScoped<IWimpRepository, WimpRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
-            if (_environment.IsProduction())
+        services.AddHttpClient<IEsiDataClient, EsiDataClient>();
+        services.AddControllers();
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "WIMP_Server", Version = "v1" });
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
             {
-                services.AddDbContext<WimpDbContext>(opt =>
-                    opt.UseSqlServer(Configuration.GetConnectionString("WimpDatabase"))
-                );
-            }
-            else
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter `Bearer` and then your valid token below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                services.AddDbContext<WimpDbContext, WimpDbContextDev>(opt =>
-                    opt.UseSqlite("Filename=wimp.sqlite")
-                );
-            }
-
-            services.AddScoped<IWimpRepository, WimpRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
-
-            services.AddHttpClient<IEsiDataClient, EsiDataClient>();
-            services.AddControllers();
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WIMP_Server", Version = "v1" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter `Bearer` and then your valid token below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
                     {
                         new OpenApiSecurityScheme {
                             Reference = new OpenApiReference {
@@ -98,70 +98,69 @@ namespace WIMP_Server
                         },
                         Array.Empty<string>()
                     }
-                });
             });
+        });
 
-            services.AddAuthentication(opt =>
-            {
-                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(opt =>
-            {
-                opt.SaveToken = true;
-                opt.RequireHttpsMetadata = false;
-
-                var jwt = Configuration
-                    .GetSection(JwtOptions.Key)
-                    .Get<JwtOptions>();
-
-                opt.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidAudience = jwt.ValidAudience,
-                    ValidIssuer = jwt.ValidIssuer,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwt.Secret)
-                    ),
-                    RequireExpirationTime = true,
-                    ValidateLifetime = true,
-                };
-            }).AddApiKeySupport(_ => { });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(Policy.OnlyAdmins, policy => policy.Requirements.Add(new OnlyAdminsRequirement()));
-                options.AddPolicy(Policy.OnlyUsers, policy => policy.Requirements.Add(new OnlyUsersRequirement()));
-            });
-
-            services.AddSingleton<IAuthorizationHandler, OnlyAdminsAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, OnlyUsersAuthorizationHandler>();
-
-            services.AddIdentityCore<User>()
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<WimpDbContext>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        services.AddAuthentication(opt =>
         {
-            if (env.IsDevelopment())
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(opt =>
+        {
+            opt.SaveToken = true;
+            opt.RequireHttpsMetadata = false;
+
+            var jwt = Configuration
+                .GetSection(JwtOptions.Key)
+                .Get<JwtOptions>();
+
+            opt.TokenValidationParameters = new TokenValidationParameters()
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WIMP_Server v1"));
-            }
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidAudience = jwt.ValidAudience,
+                ValidIssuer = jwt.ValidIssuer,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwt.Secret)
+                ),
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
+            };
+        }).AddApiKeySupport(_ => { });
 
-            app.UseRouting();
-            app.UseCors();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(Policy.OnlyAdmins, policy => policy.Requirements.Add(new OnlyAdminsRequirement()));
+            options.AddPolicy(Policy.OnlyUsers, policy => policy.Requirements.Add(new OnlyUsersRequirement()));
+        });
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+        services.AddSingleton<IAuthorizationHandler, OnlyAdminsAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationHandler, OnlyUsersAuthorizationHandler>();
 
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+        services.AddIdentityCore<User>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<WimpDbContext>();
+    }
 
-            PrepareDatabase.Prepare(app);
-            PrepareUsers.Prepare(app);
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WIMP_Server v1"));
         }
+
+        app.UseRouting();
+        app.UseCors();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
+
+        PrepareDatabase.Prepare(app);
+        PrepareUsers.Prepare(app);
     }
 }

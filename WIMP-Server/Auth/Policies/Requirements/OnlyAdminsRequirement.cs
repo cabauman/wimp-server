@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace WIMP_Server.Auth.Policies.Requirements
+namespace WIMP_Server.Auth.Policies.Requirements;
+
+public class OnlyAdminsRequirement : IAuthorizationRequirement
 {
-    public class OnlyAdminsRequirement : IAuthorizationRequirement
-    {
-    }
 }

@@ -2,43 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WIMP_Server.Searching
+namespace WIMP_Server.Searching;
+
+public static class GraphTraversalUtilities
 {
-    public static class GraphTraversalUtilities
+    public static IEnumerable<TNode> BreadthFirstSearchWithinDistance<TNode>(
+        TNode startNode,
+        int maximumDistance,
+        Func<TNode, int> idSelector,
+        Func<TNode, IEnumerable<TNode>> neighboursSelector)
     {
-        public static IEnumerable<TNode> BreadthFirstSearchWithinDistance<TNode>(
-            TNode startNode,
-            int maximumDistance,
-            Func<TNode, int> idSelector,
-            Func<TNode, IEnumerable<TNode>> neighboursSelector)
+        var nodeQueue = new Queue<Tuple<TNode, int>>();
+        var visitedNodes = new Dictionary<int, TNode>();
+
+        nodeQueue.Enqueue(Tuple.Create(startNode, 0));
+
+        while (nodeQueue.Count > 0)
         {
-            var nodeQueue = new Queue<Tuple<TNode, int>>();
-            var visitedNodes = new Dictionary<int, TNode>();
+            var (node, distance) = nodeQueue.Dequeue();
+            var nodeId = idSelector(node);
 
-            nodeQueue.Enqueue(Tuple.Create(startNode, 0));
-
-            while (nodeQueue.Count > 0)
+            if (!visitedNodes.ContainsKey(nodeId))
             {
-                var (node, distance) = nodeQueue.Dequeue();
-                var nodeId = idSelector(node);
+                visitedNodes.Add(nodeId, node);
 
-                if (!visitedNodes.ContainsKey(nodeId))
+                if (distance >= maximumDistance)
                 {
-                    visitedNodes.Add(nodeId, node);
+                    continue;
+                }
 
-                    if (distance >= maximumDistance)
-                    {
-                        continue;
-                    }
-
-                    foreach (var neighbour in neighboursSelector(node))
-                    {
-                        nodeQueue.Enqueue(Tuple.Create(neighbour, distance + 1));
-                    }
+                foreach (var neighbour in neighboursSelector(node))
+                {
+                    nodeQueue.Enqueue(Tuple.Create(neighbour, distance + 1));
                 }
             }
-
-            return visitedNodes.Values.ToList();
         }
+
+        return visitedNodes.Values.ToList();
     }
 }
