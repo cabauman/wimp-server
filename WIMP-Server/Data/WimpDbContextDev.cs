@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace WIMP_Server.Data
+namespace WIMP_Server.Data;
+
+public class WimpDbContextDev : WimpDbContext
 {
-    public class WimpDbContextDev : WimpDbContext
+    public WimpDbContextDev(DbContextOptions options) : base(options)
     {
-        public WimpDbContextDev(DbContextOptions options) : base(options)
-        {
-        }
     }
 }
